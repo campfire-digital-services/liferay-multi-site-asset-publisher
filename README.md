@@ -1,2 +1,2 @@
-liferay-asset-publisher
+liferay-multisite-asset-publisher
 =======================
