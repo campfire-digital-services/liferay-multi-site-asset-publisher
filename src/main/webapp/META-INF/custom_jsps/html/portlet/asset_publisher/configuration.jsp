@@ -13,63 +13,51 @@ You should have received a copy of the GNU General Public License along with thi
 not, see <http://www.gnu.org/licenses/>.
 -->
 
-<%@ include file="/html/portlet/asset_publisher/init.jsp"%>
+<%@ include file="/html/portlet/asset_publisher/init.jsp" %>
 
 <%
-	String tabs2 = ParamUtil.getString(request, "tabs2");
+String tabs2 = ParamUtil.getString(request, "tabs2");
 
-	String redirect = ParamUtil.getString(request, "redirect");
+String redirect = ParamUtil.getString(request, "redirect");
 
-	String typeSelection = ParamUtil.getString(request, "typeSelection", StringPool.BLANK);
+String typeSelection = ParamUtil.getString(request, "typeSelection", StringPool.BLANK);
 
-	AssetRendererFactory rendererFactory = AssetRendererFactoryRegistryUtil.getAssetRendererFactoryByClassName(typeSelection);
+AssetRendererFactory rendererFactory = AssetRendererFactoryRegistryUtil.getAssetRendererFactoryByClassName(typeSelection);
 
-	List<AssetRendererFactory> classTypesAssetRendererFactories = new ArrayList<AssetRendererFactory>();
+List<AssetRendererFactory> classTypesAssetRendererFactories = new ArrayList<AssetRendererFactory>();
 
-	Group scopeGroup = themeDisplay.getScopeGroup();
+Group scopeGroup = themeDisplay.getScopeGroup();
 %>
 
-<liferay-portlet:actionURL portletConfiguration="true"
-	var="configurationActionURL" />
-<liferay-portlet:renderURL portletConfiguration="true"
-	varImpl="configurationRenderURL" />
+<liferay-portlet:actionURL portletConfiguration="true" var="configurationActionURL" />
+<liferay-portlet:renderURL portletConfiguration="true" varImpl="configurationRenderURL" />
 
-<aui:form action="<%=configurationActionURL%>" method="post" name="fm"
-	onSubmit="event.preventDefault();">
-	<aui:input name="<%=Constants.CMD%>" type="hidden"
-		value="<%=Constants.UPDATE%>" />
-	<aui:input name="tabs2" type="hidden" value="<%=tabs2%>" />
-	<aui:input name="redirect" type="hidden"
-		value="<%=configurationRenderURL.toString()%>" />
+<aui:form action="<%= configurationActionURL %>" method="post" name="fm" onSubmit="event.preventDefault();">
+	<aui:input name="<%= Constants.CMD %>" type="hidden" value="<%= Constants.UPDATE %>" />
+	<aui:input name="tabs2" type="hidden" value="<%= tabs2 %>" />
+	<aui:input name="redirect" type="hidden" value="<%= configurationRenderURL.toString() %>" />
 	<aui:input name="groupId" type="hidden" />
-	<aui:input name="assetEntryType" type="hidden"
-		value="<%=typeSelection%>" />
+	<aui:input name="assetEntryType" type="hidden" value="<%= typeSelection %>" />
 	<aui:input name="typeSelection" type="hidden" />
 	<aui:input name="assetEntryId" type="hidden" />
 	<aui:input name="assetParentId" type="hidden" />
 	<aui:input name="preferences--assetTitle--" type="hidden" />
 	<aui:input name="assetEntryOrder" type="hidden" value="-1" />
 
-	<c:if test="<%=typeSelection.equals(StringPool.BLANK)%>">
+	<c:if test="<%= typeSelection.equals(StringPool.BLANK) %>">
 
 		<%
-			String rootPortletId = PortletConstants.getRootPortletId(portletResource);
+		String rootPortletId = PortletConstants.getRootPortletId(portletResource);
 		%>
 
 		<c:choose>
-			<c:when
-				test="<%=rootPortletId.equals(PortletKeys.RELATED_ASSETS)%>">
-				<aui:input name="preferences--selectionStyle--" type="hidden"
-					value="dynamic" />
+			<c:when test="<%= rootPortletId.equals(PortletKeys.RELATED_ASSETS) %>">
+				<aui:input name="preferences--selectionStyle--" type="hidden" value="dynamic" />
 			</c:when>
 			<c:otherwise>
-				<aui:select label="asset-selection"
-					name="preferences--selectionStyle--"
-					onChange='<%=renderResponse.getNamespace() + "chooseSelectionStyle();"%>'>
-					<aui:option label="dynamic"
-						selected='<%=selectionStyle.equals("dynamic")%>' />
-					<aui:option label="manual"
-						selected='<%=selectionStyle.equals("manual")%>' />
+				<aui:select label="asset-selection" name="preferences--selectionStyle--" onChange='<%= renderResponse.getNamespace() + "chooseSelectionStyle();" %>'>
+					<aui:option label="dynamic" selected='<%= selectionStyle.equals("dynamic") %>'/>
+					<aui:option label="manual" selected='<%= selectionStyle.equals("manual") %>'/>
 				</aui:select>
 			</c:otherwise>
 		</c:choose>
@@ -77,62 +65,61 @@ not, see <http://www.gnu.org/licenses/>.
 		<liferay-util:buffer var="selectScope">
 
 			<%
-				Set<Group> groups = new HashSet<Group>();
-				groups.add(company.getGroup());
-				groups.add(scopeGroup);
+			Set<Group> groups = new HashSet<Group>();
 
-				//Added this block to source content from all the available sites and organizations
-				//to asset publisher except control panel content
-				for (Group group : GroupLocalServiceUtil.getGroups(-1, -1)) {
-					 if (group.isControlPanel()) {
-						continue;
-					}
-
-					if (group.isRegularSite() || group.isOrganization()) {
-						groups.add(group);
-					}
-				}				
-
-				for (Layout curLayout : LayoutLocalServiceUtil.getLayouts(layout.getGroupId(), layout.isPrivateLayout())) {
-					if (curLayout.hasScopeGroup()) {
-						groups.add(curLayout.getScopeGroup());
-					}
+			groups.add(company.getGroup());
+			groups.add(scopeGroup);
+			
+			//Added this block to source content from all the available sites and organizations
+			//to asset publisher except control panel content
+			for (Group group : GroupLocalServiceUtil.getGroups(-1, -1)) {
+				if (group.isControlPanel()) {
+					continue;
 				}
 
-				// Left list
-				List<KeyValuePair> scopesLeftList = new ArrayList<KeyValuePair>();
-
-				for (long groupId : groupIds) {
-					Group group = GroupLocalServiceUtil.getGroup(groupId);
-					scopesLeftList.add(new KeyValuePair(_getKey(group, scopeGroupId), _getName(group, locale)));
+				if (group.isRegularSite() || group.isOrganization()) {
+					groups.add(group);
 				}
+			}
 
-				// Right list
-				List<KeyValuePair> scopesRightList = new ArrayList<KeyValuePair>();
-				Arrays.sort(groupIds);
+			for (Layout curLayout : LayoutLocalServiceUtil.getLayouts(layout.getGroupId(), layout.isPrivateLayout())) {
+				if (curLayout.hasScopeGroup()) {
+					groups.add(curLayout.getScopeGroup());
+				}
+			}
+
+			// Left list
+			List<KeyValuePair> scopesLeftList = new ArrayList<KeyValuePair>();
+
+			for (long groupId : groupIds) {
+				Group group = GroupLocalServiceUtil.getGroup(groupId);
+
+				scopesLeftList.add(new KeyValuePair(_getKey(group, scopeGroupId), _getName(group, locale)));
+			}
+
+			// Right list
+
+			List<KeyValuePair> scopesRightList = new ArrayList<KeyValuePair>();
+
+			Arrays.sort(groupIds);
 			%>
 
-			<aui:select label="" name="preferences--defaultScope--"
-				onChange='<%=renderResponse.getNamespace() + "selectScope();"%>'>
-				<aui:option
-					label='<%=LanguageUtil.get(pageContext, "select-more-than-one") + "..."%>'
-					selected="<%=groupIds.length > 1%>" value="<%=false%>" />
+			<aui:select label="" name="preferences--defaultScope--" onChange='<%= renderResponse.getNamespace() + "selectScope();" %>'>
+				<aui:option label='<%= LanguageUtil.get(pageContext,"select-more-than-one") + "..." %>' selected="<%= groupIds.length > 1 %>" value="<%= false %>" />
 
 				<optgroup label="<liferay-ui:message key="scopes" />">
 
 					<%
-						for (Group group : groups) {
-							if (Arrays.binarySearch(groupIds, group.getGroupId()) < 0) {
-								scopesRightList.add(new KeyValuePair(_getKey(group, scopeGroupId), _getName(group, locale)));
-							}
+					for (Group group : groups) {
+						if (Arrays.binarySearch(groupIds, group.getGroupId()) < 0) {
+							scopesRightList.add(new KeyValuePair(_getKey(group, scopeGroupId), _getName(group, locale)));
+						}
 					%>
 
-					<aui:option label="<%=_getName(group, locale)%>"
-						selected="<%=(groupIds.length == 1) && (group.getGroupId() == groupIds[0])%>"
-						value="<%=_getKey(group, scopeGroupId)%>" />
+						<aui:option label="<%= _getName(group, locale) %>" selected="<%= (groupIds.length == 1) && (group.getGroupId() == groupIds[0]) %>" value="<%= _getKey(group, scopeGroupId) %>" />
 
 					<%
-						}
+					}
 					%>
 
 				</optgroup>
@@ -141,28 +128,28 @@ not, see <http://www.gnu.org/licenses/>.
 			<aui:input name="preferences--scopeIds--" type="hidden" />
 
 			<%
-				scopesRightList = ListUtil.sort(scopesRightList, new KeyValuePairComparator(false, true));
+			scopesRightList = ListUtil.sort(scopesRightList, new KeyValuePairComparator(false, true));
 			%>
 
-			<div class="<%=defaultScope ? "aui-helper-hidden" : ""%>"
-				id="<portlet:namespace />scopesBoxes">
-				<liferay-ui:input-move-boxes leftBoxName="currentScopeIds"
-					leftList="<%=scopesLeftList%>" leftReorder="true"
-					leftTitle="selected" rightBoxName="availableScopeIds"
-					rightList="<%=scopesRightList%>" rightTitle="available" />
+			<div class="<%= defaultScope ? "aui-helper-hidden" : "" %>" id="<portlet:namespace />scopesBoxes">
+				<liferay-ui:input-move-boxes
+					leftBoxName="currentScopeIds"
+					leftList="<%= scopesLeftList %>"
+					leftReorder="true"
+					leftTitle="selected"
+					rightBoxName="availableScopeIds"
+					rightList="<%= scopesRightList %>"
+					rightTitle="available"
+				/>
 			</div>
 		</liferay-util:buffer>
 
 		<c:choose>
-			<c:when test='<%=selectionStyle.equals("manual")%>'>
-				<liferay-ui:panel-container extended="<%=true%>"
-					id="assetPublisherSelectionStylePanelContainer"
-					persistState="<%=true%>">
-					<liferay-ui:panel collapsible="<%=true%>" extended="<%=true%>"
-						id="assetPublisherSelectionStylePanel" persistState="<%=true%>"
-						title="selection">
+			<c:when test='<%= selectionStyle.equals("manual") %>'>
+				<liferay-ui:panel-container extended="<%= true %>" id="assetPublisherSelectionStylePanelContainer" persistState="<%= true %>">
+					<liferay-ui:panel collapsible="<%= true %>" extended="<%= true %>" id="assetPublisherSelectionStylePanel" persistState="<%= true %>" title="selection">
 						<aui:fieldset label="scope">
-							<%=selectScope%>
+							<%= selectScope %>
 						</aui:fieldset>
 
 						<aui:fieldset>
@@ -177,29 +164,24 @@ not, see <http://www.gnu.org/licenses/>.
 
 								<div class="add-asset-selector">
 									<div class="lfr-meta-actions edit-controls">
-										<%@ include file="/html/portlet/asset_publisher/add_asset.jspf"%>
+										<%@ include file="/html/portlet/asset_publisher/add_asset.jspf" %>
 
-										<liferay-ui:icon-menu align="left"
-										cssClass="select-existing-selector"
-										icon='<%=themeDisplay.getPathThemeImages() + "/common/search.png"%>'
-										message="select-existing" showWhenSingleIcon="<%=true%>">
+										<liferay-ui:icon-menu align="left" cssClass="select-existing-selector" icon='<%= themeDisplay.getPathThemeImages() + "/common/search.png" %>' message="select-existing" showWhenSingleIcon="<%= true %>">
 
-										<%
+											<%
 											for (AssetRendererFactory curRendererFactory : AssetRendererFactoryRegistryUtil.getAssetRendererFactories()) {
 												if (curRendererFactory.isSelectable()) {
-													String taglibURL = "javascript:" + renderResponse.getNamespace() + "selectionForType('" + groupId
-																					+ "', '" + curRendererFactory.getClassName() + "')";
-										%>
+													String taglibURL = "javascript:" + renderResponse.getNamespace() + "selectionForType('" + groupId + "', '" + curRendererFactory.getClassName() + "')";
+												%>
 
-										<liferay-ui:icon
-											message="<%=ResourceActionsUtil.getModelResource(locale, curRendererFactory.getClassName())%>"
-											src="<%=curRendererFactory.getIconPath(renderRequest)%>"
-											url="<%=taglibURL%>" />
+													<liferay-ui:icon
+														message="<%= ResourceActionsUtil.getModelResource(locale, curRendererFactory.getClassName()) %>" src="<%= curRendererFactory.getIconPath(renderRequest) %>" url="<%= taglibURL %>"
+													/>
 
-										<%
+												<%
+												}
 											}
-																				}
-										%>
+											%>
 
 										</liferay-ui:icon-menu>
 									</div>
@@ -216,9 +198,7 @@ not, see <http://www.gnu.org/licenses/>.
 							headerNames.add("title");
 							headerNames.add(StringPool.BLANK);
 
-							SearchContainer searchContainer = new SearchContainer(renderRequest, new DisplayTerms(renderRequest), new DisplayTerms(
-																renderRequest), SearchContainer.DEFAULT_CUR_PARAM, SearchContainer.DEFAULT_DELTA, configurationRenderURL,
-																headerNames, LanguageUtil.get(pageContext, "no-assets-selected"));
+							SearchContainer searchContainer = new SearchContainer(renderRequest, new DisplayTerms(renderRequest), new DisplayTerms(renderRequest), SearchContainer.DEFAULT_CUR_PARAM, SearchContainer.DEFAULT_DELTA, configurationRenderURL, headerNames, LanguageUtil.get(pageContext, "no-assets-selected"));
 
 							int total = assetEntryXmls.length;
 
@@ -235,7 +215,7 @@ not, see <http://www.gnu.org/licenses/>.
 							List resultRows = searchContainer.getResultRows();
 
 							for (int i = 0; i < results.size(); i++) {
-								String assetEntryXml = (String) results.get(i);
+								String assetEntryXml = (String)results.get(i);
 
 								Document doc = SAXReaderUtil.read(assetEntryXml);
 
@@ -247,7 +227,8 @@ not, see <http://www.gnu.org/licenses/>.
 
 								if (assetEntryOrder == (total - 1)) {
 									DocUtil.add(root, "last", true);
-								} else {
+								}
+								else {
 									DocUtil.add(root, "last", false);
 								}
 
@@ -260,13 +241,14 @@ not, see <http://www.gnu.org/licenses/>.
 
 								for (long groupId : groupIds) {
 									try {
-											assetEntry = AssetEntryLocalServiceUtil.getEntry(groupId, assetEntryUuid);
+										assetEntry = AssetEntryLocalServiceUtil.getEntry(groupId, assetEntryUuid);
 
-											assetEntry = assetEntry.toEscapedModel();
+										assetEntry = assetEntry.toEscapedModel();
 
-											deleteAssetEntry = false;
-										} catch (NoSuchEntryException nsee) {
-										}
+										deleteAssetEntry = false;
+									}
+									catch (NoSuchEntryException nsee) {
+									}
 								}
 
 								if (deleteAssetEntry) {
@@ -293,8 +275,7 @@ not, see <http://www.gnu.org/licenses/>.
 
 								// Title
 
-								AssetRendererFactory assetRendererFactory = AssetRendererFactoryRegistryUtil
-																		.getAssetRendererFactoryByClassName(assetEntry.getClassName());
+								AssetRendererFactory assetRendererFactory = AssetRendererFactoryRegistryUtil.getAssetRendererFactoryByClassName(assetEntry.getClassName());
 
 								AssetRenderer assetRenderer = assetRendererFactory.getAssetRenderer(assetEntry.getClassPK());
 
@@ -315,7 +296,8 @@ not, see <http://www.gnu.org/licenses/>.
 									sb.append(title);
 
 									row.addText(sb.toString(), rowURL);
-								} else {
+								}
+								else {
 									row.addText(title, rowURL);
 								}
 
@@ -331,94 +313,72 @@ not, see <http://www.gnu.org/licenses/>.
 							AssetPublisherUtil.removeAndStoreSelection(deletedAssets, preferences);
 							%>
 
-							<c:if test="<%=!deletedAssets.isEmpty()%>">
+							<c:if test="<%= !deletedAssets.isEmpty() %>">
 								<div class="portlet-msg-info">
-									<liferay-ui:message
-										key="the-selected-assets-have-been-removed-from-the-list-because-they-do-not-belong-in-the-scope-of-this-portlet" />
+									<liferay-ui:message key="the-selected-assets-have-been-removed-from-the-list-because-they-do-not-belong-in-the-scope-of-this-portlet" />
 								</div>
 							</c:if>
 
-							<liferay-ui:search-iterator
-								searchContainer="<%=searchContainer%>" />
+							<liferay-ui:search-iterator searchContainer="<%= searchContainer %>" />
 						</aui:fieldset>
 					</liferay-ui:panel>
-					<liferay-ui:panel collapsible="<%=true%>" extended="<%=true%>"
-						id="assetPublisherSelectionDisplaySettingsPanel"
-						persistState="<%=true%>" title="display-settings">
-						<%@ include
-							file="/html/portlet/asset_publisher/display_settings.jspf"%>
+					<liferay-ui:panel collapsible="<%= true %>" extended="<%= true %>" id="assetPublisherSelectionDisplaySettingsPanel" persistState="<%= true %>" title="display-settings">
+						<%@ include file="/html/portlet/asset_publisher/display_settings.jspf" %>
 					</liferay-ui:panel>
 				</liferay-ui:panel-container>
 
 				<aui:button-row>
-					<aui:button
-						onClick='<%=renderResponse.getNamespace() + "saveSelectBoxes();"%>'
-						type="submit" />
+					<aui:button onClick='<%= renderResponse.getNamespace() + "saveSelectBoxes();" %>' type="submit" />
 				</aui:button-row>
 			</c:when>
-			<c:when test='<%=selectionStyle.equals("dynamic")%>'>
-				<liferay-ui:panel-container extended="<%=true%>"
-					id="assetPublisherDynamicSelectionStylePanelContainer"
-					persistState="<%=true%>">
-					<liferay-ui:panel collapsible="<%=true%>" extended="<%=true%>"
-						id="assetPublisherSourcePanel" persistState="<%=true%>"
-						title="source">
-						<aui:fieldset
-							cssClass='<%=rootPortletId.equals(PortletKeys.RELATED_ASSETS) ? "aui-helper-hidden" : ""%>'
-							label="scope">
-							<%=selectScope%>
+			<c:when test='<%= selectionStyle.equals("dynamic") %>'>
+				<liferay-ui:panel-container extended="<%= true %>" id="assetPublisherDynamicSelectionStylePanelContainer" persistState="<%= true %>">
+					<liferay-ui:panel collapsible="<%= true %>" extended="<%= true %>" id="assetPublisherSourcePanel" persistState="<%= true %>" title="source">
+						<aui:fieldset cssClass='<%= rootPortletId.equals(PortletKeys.RELATED_ASSETS) ? "aui-helper-hidden" : "" %>' label="scope">
+							<%= selectScope %>
 						</aui:fieldset>
 
 						<aui:fieldset label="asset-entry-type">
 
 							<%
-								Set<Long> availableClassNameIdsSet = SetUtil.fromArray(availableClassNameIds);
+							Set<Long> availableClassNameIdsSet = SetUtil.fromArray(availableClassNameIds);
 
-								// Left list
+							// Left list
 
-								List<KeyValuePair> typesLeftList = new ArrayList<KeyValuePair>();
+							List<KeyValuePair> typesLeftList = new ArrayList<KeyValuePair>();
 
-								for (long classNameId : classNameIds) {
-									String className = PortalUtil.getClassName(classNameId);
+							for (long classNameId : classNameIds) {
+								String className = PortalUtil.getClassName(classNameId);
 
-									typesLeftList.add(new KeyValuePair(String.valueOf(classNameId), ResourceActionsUtil.getModelResource(locale,
-																className)));
-									}
+								typesLeftList.add(new KeyValuePair(String.valueOf(classNameId), ResourceActionsUtil.getModelResource(locale, className)));
+							}
 
-									// Right list
+							// Right list
 
-									List<KeyValuePair> typesRightList = new ArrayList<KeyValuePair>();
+							List<KeyValuePair> typesRightList = new ArrayList<KeyValuePair>();
 
-									Arrays.sort(classNameIds);
+							Arrays.sort(classNameIds);
 							%>
 
 							<aui:select label="" name="preferences--anyAssetType--">
-								<aui:option label="any" selected="<%=anyAssetType%>"
-									value="<%=true%>" />
-								<aui:option
-									label='<%=LanguageUtil.get(pageContext, "select-more-than-one") + "..."%>'
-									selected="<%=!anyAssetType && (classNameIds.length > 1)%>"
-									value="<%=false%>" />
+								<aui:option label="any" selected="<%= anyAssetType %>" value="<%= true %>" />
+								<aui:option label='<%= LanguageUtil.get(pageContext, "select-more-than-one") + "..." %>' selected="<%= !anyAssetType && (classNameIds.length > 1) %>" value="<%= false %>" />
 
 								<optgroup label="<liferay-ui:message key="asset-type" />">
 
 									<%
-										for (long classNameId : availableClassNameIdsSet) {
-											ClassName className = ClassNameLocalServiceUtil.getClassName(classNameId);
+									for (long classNameId : availableClassNameIdsSet) {
+										ClassName className = ClassNameLocalServiceUtil.getClassName(classNameId);
 
-											if (Arrays.binarySearch(classNameIds, classNameId) < 0) {
-												typesRightList.add(new KeyValuePair(String.valueOf(classNameId), ResourceActionsUtil.getModelResource(
-																		locale, className.getValue())));
-											}
+										if (Arrays.binarySearch(classNameIds, classNameId) < 0) {
+											typesRightList.add(new KeyValuePair(String.valueOf(classNameId), ResourceActionsUtil.getModelResource(locale, className.getValue())));
+										}
 									%>
 
-									<aui:option
-										label="<%=ResourceActionsUtil.getModelResource(locale, className.getValue())%>"
-										selected="<%=(classNameIds.length == 1) && (classNameId == classNameIds[0])%>"
-										value="<%=classNameId%>" />
+									<aui:option label="<%= ResourceActionsUtil.getModelResource(locale, className.getValue()) %>" selected="<%= (classNameIds.length == 1) && (classNameId == classNameIds[0]) %>" value="<%= classNameId %>" />
 
 									<%
-										}
+									}
 									%>
 
 								</optgroup>
@@ -427,431 +387,323 @@ not, see <http://www.gnu.org/licenses/>.
 							<aui:input name="preferences--classNameIds--" type="hidden" />
 
 							<%
-								typesRightList = ListUtil.sort(typesRightList, new KeyValuePairComparator(false, true));
+							typesRightList = ListUtil.sort(typesRightList, new KeyValuePairComparator(false, true));
 							%>
 
-							<div
-								class="<%=anyAssetType ? "aui-helper-hidden" : ""%>"
-								id="<portlet:namespace />classNamesBoxes">
-								<liferay-ui:input-move-boxes leftBoxName="currentClassNameIds"
-									leftList="<%=typesLeftList%>" leftReorder="true"
-									leftTitle="selected" rightBoxName="availableClassNameIds"
-									rightList="<%=typesRightList%>" rightTitle="available" />
+							<div class="<%= anyAssetType ? "aui-helper-hidden" : "" %>" id="<portlet:namespace />classNamesBoxes">
+								<liferay-ui:input-move-boxes
+									leftBoxName="currentClassNameIds"
+									leftList="<%= typesLeftList %>"
+									leftReorder="true"
+									leftTitle="selected"
+									rightBoxName="availableClassNameIds"
+									rightList="<%= typesRightList %>"
+									rightTitle="available"
+								/>
 							</div>
 
 							<%
-								for (AssetRendererFactory assetRendererFactory : AssetRendererFactoryRegistryUtil.getAssetRendererFactories()) {
-									if (assetRendererFactory.getClassTypes(new long[] { themeDisplay.getCompanyGroupId(), scopeGroupId },
-																	themeDisplay.getLocale()) == null) {
-										continue;
-									}
+							for (AssetRendererFactory assetRendererFactory : AssetRendererFactoryRegistryUtil.getAssetRendererFactories()) {
+								if (assetRendererFactory.getClassTypes(new long[] {themeDisplay.getCompanyGroupId(), scopeGroupId}, themeDisplay.getLocale()) == null) {
+									continue;
+								}
 
-									classTypesAssetRendererFactories.add(assetRendererFactory);
+								classTypesAssetRendererFactories.add(assetRendererFactory);
 
-									Map<Long, String> assetAvailableClassTypes = assetRendererFactory.getClassTypes(
-																		new long[] { themeDisplay.getCompanyGroupId(), scopeGroupId }, themeDisplay.getLocale());
+								Map<Long, String> assetAvailableClassTypes = assetRendererFactory.getClassTypes(new long[] {themeDisplay.getCompanyGroupId(), scopeGroupId}, themeDisplay.getLocale());
 
-									String className = AssetPublisherUtil.getClassName(assetRendererFactory);
+								String className = AssetPublisherUtil.getClassName(assetRendererFactory);
 
-									Long[] assetAvailableClassTypeIds = ArrayUtil.toLongArray(assetAvailableClassTypes.keySet().toArray());
-									Long[] assetSelectedClassTypeIds = AssetPublisherUtil.getClassTypeIds(preferences, className,
-																		assetAvailableClassTypeIds);
+								Long[] assetAvailableClassTypeIds = ArrayUtil.toLongArray(assetAvailableClassTypes.keySet().toArray());
+								Long[] assetSelectedClassTypeIds = AssetPublisherUtil.getClassTypeIds(preferences, className, assetAvailableClassTypeIds);
 
-									// Left list
+								// Left list
 
-									List<KeyValuePair> subTypesLeftList = new ArrayList<KeyValuePair>();
+								List<KeyValuePair> subTypesLeftList = new ArrayList<KeyValuePair>();
 
-									for (long subTypeId : assetSelectedClassTypeIds) {
-														subTypesLeftList.add(new KeyValuePair(String.valueOf(subTypeId), HtmlUtil.escape(assetAvailableClassTypes
-																			.get(subTypeId))));
-									}
+								for (long subTypeId : assetSelectedClassTypeIds) {
+									subTypesLeftList.add(new KeyValuePair(String.valueOf(subTypeId), HtmlUtil.escape(assetAvailableClassTypes.get(subTypeId))));
+								}
 
-									Arrays.sort(assetSelectedClassTypeIds);
+								Arrays.sort(assetSelectedClassTypeIds);
 
-									// Right list
+								// Right list
 
-									List<KeyValuePair> subTypesRightList = new ArrayList<KeyValuePair>();
+								List<KeyValuePair> subTypesRightList = new ArrayList<KeyValuePair>();
 
-									boolean anyAssetSubType = GetterUtil.getBoolean(preferences.getValue("anyClassType" + className,
-															Boolean.TRUE.toString()));
+								boolean anyAssetSubType = GetterUtil.getBoolean(preferences.getValue("anyClassType" + className, Boolean.TRUE.toString()));
 							%>
 
-							<div
-								class='asset-subtype <%=(assetSelectedClassTypeIds.length < 1) ? "" : "aui-helper-hidden"%>'
-								id="<portlet:namespace /><%=className%>Options">
-								<aui:select
-									label='<%=LanguageUtil.format(pageContext, "x-subtype",
-														ResourceActionsUtil.getModelResource(locale, assetRendererFactory.getClassName()))%>'
-									name='<%="preferences--anyClassType" + className + "--"%>'>
-									<aui:option label="any" selected="<%=anyAssetSubType%>"
-										value="<%=true%>" />
-									<aui:option
-										label='<%=LanguageUtil.get(pageContext, "select-more-than-one") + "..."%>'
-										selected="<%=!anyAssetSubType && (assetSelectedClassTypeIds.length > 1)%>"
-										value="<%=false%>" />
+							<div class='asset-subtype <%= (assetSelectedClassTypeIds.length < 1) ? "" : "aui-helper-hidden" %>' id="<portlet:namespace /><%= className %>Options">
+								<aui:select label='<%= LanguageUtil.format(pageContext, "x-subtype", ResourceActionsUtil.getModelResource(locale, assetRendererFactory.getClassName())) %>' name='<%= "preferences--anyClassType" + className + "--" %>'>
+									<aui:option label="any" selected="<%= anyAssetSubType %>" value="<%= true %>" />
+									<aui:option label='<%= LanguageUtil.get(pageContext, "select-more-than-one") + "..." %>' selected="<%= !anyAssetSubType && (assetSelectedClassTypeIds.length > 1) %>" value="<%= false %>" />
 
 									<optgroup label="<liferay-ui:message key="subtype" />">
 
 										<%
-											for (Long classTypeId : assetAvailableClassTypes.keySet()) {
-												if (Arrays.binarySearch(assetSelectedClassTypeIds, classTypeId) < 0) {
-																						subTypesRightList.add(new KeyValuePair(String.valueOf(classTypeId), HtmlUtil
-																								.escape(assetAvailableClassTypes.get(classTypeId))));
-												}
+										for(Long classTypeId : assetAvailableClassTypes.keySet()) {
+											if (Arrays.binarySearch(assetSelectedClassTypeIds, classTypeId) < 0) {
+												subTypesRightList.add(new KeyValuePair(String.valueOf(classTypeId), HtmlUtil.escape(assetAvailableClassTypes.get(classTypeId))));
+											}
 										%>
 
-										<aui:option
-											label="<%=HtmlUtil.escapeAttribute(assetAvailableClassTypes.get(classTypeId))%>"
-											selected="<%=!anyAssetSubType && (assetSelectedClassTypeIds.length == 1)
-															&& (classTypeId.equals(assetSelectedClassTypeIds[0]))%>"
-											value="<%=classTypeId%>" />
+											<aui:option label="<%= HtmlUtil.escapeAttribute(assetAvailableClassTypes.get(classTypeId)) %>" selected="<%= !anyAssetSubType && (assetSelectedClassTypeIds.length == 1) && (classTypeId.equals(assetSelectedClassTypeIds[0])) %>" value="<%= classTypeId %>" />
 
 										<%
-											}
+										}
 										%>
 
 									</optgroup>
 								</aui:select>
 
-								<aui:input
-									name='<%="preferences--classTypeIds" + className + "--"%>'
-									type="hidden" />
+								<aui:input name='<%= "preferences--classTypeIds" + className + "--" %>' type="hidden" />
 
 								<%
-									typesRightList = ListUtil.sort(typesRightList, new KeyValuePairComparator(false, true));
+								typesRightList = ListUtil.sort(typesRightList, new KeyValuePairComparator(false, true));
 								%>
 
-								<div
-									class="<%=assetSelectedClassTypeIds.length > 1 ? "" : "aui-helper-hidden"%>"
-									id="<portlet:namespace /><%=className%>Boxes">
+								<div class="<%= assetSelectedClassTypeIds.length > 1 ? "" : "aui-helper-hidden" %>" id="<portlet:namespace /><%= className %>Boxes">
 									<liferay-ui:input-move-boxes
-										leftBoxName='<%=className + "currentClassTypeIds"%>'
-										leftList="<%=subTypesLeftList%>" leftReorder="true"
+										leftBoxName='<%= className + "currentClassTypeIds" %>'
+										leftList="<%= subTypesLeftList %>"
+										leftReorder="true"
 										leftTitle="selected"
-										rightBoxName='<%=className + "availableClassTypeIds"%>'
-										rightList="<%=subTypesRightList%>" rightTitle="available" />
+										rightBoxName='<%= className + "availableClassTypeIds" %>'
+										rightList="<%= subTypesRightList %>"
+										rightTitle="available"
+									/>
 								</div>
 							</div>
 
 							<%
-								}
+							}
 							%>
 
 						</aui:fieldset>
 					</liferay-ui:panel>
 
-					<liferay-ui:panel collapsible="<%=true%>" extended="<%=true%>"
-						id="assetPublisherQueryRulesPanelContainer"
-						persistState="<%=true%>" title="filter[action]">
+					<liferay-ui:panel collapsible="<%= true %>" extended="<%= true %>" id="assetPublisherQueryRulesPanelContainer" persistState="<%= true %>" title="filter[action]">
 						<liferay-ui:asset-tags-error />
 
 						<div id="<portlet:namespace />queryRules">
 							<aui:fieldset label="displayed-assets-must-match-these-rules">
 
 								<%
-									String queryLogicIndexesParam = ParamUtil.getString(request, "queryLogicIndexes");
+								String queryLogicIndexesParam = ParamUtil.getString(request, "queryLogicIndexes");
 
-									int[] queryLogicIndexes = null;
+								int[] queryLogicIndexes = null;
 
-									if (Validator.isNotNull(queryLogicIndexesParam)) {
-													queryLogicIndexes = StringUtil.split(queryLogicIndexesParam, 0);
-									} else {
-											queryLogicIndexes = new int[0];
+								if (Validator.isNotNull(queryLogicIndexesParam)) {
+									queryLogicIndexes = StringUtil.split(queryLogicIndexesParam, 0);
+								}
+								else {
+									queryLogicIndexes = new int[0];
 
-											for (int i = 0; true; i++) {
-												String queryValues = PrefsParamUtil.getString(preferences, request, "queryValues" + i);
+									for (int i = 0; true; i++) {
+										String queryValues = PrefsParamUtil.getString(preferences, request, "queryValues" + i);
 
-												if (Validator.isNull(queryValues)) {
-													break;
-												}
+										if (Validator.isNull(queryValues)) {
+											break;
+										}
 
-												queryLogicIndexes = ArrayUtil.append(queryLogicIndexes, i);
-												}
+										queryLogicIndexes = ArrayUtil.append(queryLogicIndexes, i);
+									}
 
-												if (queryLogicIndexes.length == 0) {
-													queryLogicIndexes = ArrayUtil.append(queryLogicIndexes, -1);
-												}
-											}
+									if (queryLogicIndexes.length == 0) {
+										queryLogicIndexes = ArrayUtil.append(queryLogicIndexes, -1);
+									}
+								}
 
-											int index = 0;
+								int index = 0;
 
-											for (int queryLogicIndex : queryLogicIndexes) {
-												String queryValues = StringUtil.merge(preferences.getValues("queryValues" + queryLogicIndex, new String[0]));
-												String tagNames = ParamUtil.getString(request, "queryTagNames" + queryLogicIndex, queryValues);
-												String categoryIds = ParamUtil.getString(request, "queryCategoryIds" + queryLogicIndex, queryValues);
+								for (int queryLogicIndex : queryLogicIndexes) {
+									String queryValues = StringUtil.merge(preferences.getValues("queryValues" + queryLogicIndex , new String[0]));
+									String tagNames = ParamUtil.getString(request, "queryTagNames" + queryLogicIndex, queryValues);
+									String categoryIds = ParamUtil.getString(request, "queryCategoryIds" + queryLogicIndex, queryValues);
 
-												if (Validator.isNotNull(tagNames) || Validator.isNotNull(categoryIds) || (queryLogicIndexes.length == 1)) {
-													request.setAttribute("configuration.jsp-index", String.valueOf(index));
-													request.setAttribute("configuration.jsp-queryLogicIndex", String.valueOf(queryLogicIndex));
+									if (Validator.isNotNull(tagNames) || Validator.isNotNull(categoryIds) || (queryLogicIndexes.length == 1)) {
+										request.setAttribute("configuration.jsp-index", String.valueOf(index));
+										request.setAttribute("configuration.jsp-queryLogicIndex", String.valueOf(queryLogicIndex));
 								%>
 
-								<div class="lfr-form-row">
-									<div class="row-fields">
-										<liferay-util:include
-											page="/html/portlet/asset_publisher/edit_query_rule.jsp" />
-									</div>
-								</div>
+										<div class="lfr-form-row">
+											<div class="row-fields">
+												<liferay-util:include page="/html/portlet/asset_publisher/edit_query_rule.jsp" />
+											</div>
+										</div>
 
 								<%
-												}
-
-												index++;
 									}
+
+									index++;
+								}
 								%>
 
 							</aui:fieldset>
 						</div>
 
-						<aui:input
-							label='<%=LanguageUtil.format(pageContext, "show-only-assets-with-x-as-its-display-page",
-											HtmlUtil.escape(layout.getName(locale)), false)%>'
-							name="preferences--showOnlyLayoutAssets--" type="checkbox"
-							value="<%=showOnlyLayoutAssets%>" />
+						<aui:input label='<%= LanguageUtil.format(pageContext, "show-only-assets-with-x-as-its-display-page", HtmlUtil.escape(layout.getName(locale)), false) %>' name="preferences--showOnlyLayoutAssets--" type="checkbox" value="<%= showOnlyLayoutAssets %>" />
 
-						<aui:input label="include-tags-specified-in-the-url"
-							name="preferences--mergeUrlTags--" type="checkbox"
-							value="<%=mergeUrlTags%>" />
+						<aui:input label="include-tags-specified-in-the-url" name="preferences--mergeUrlTags--" type="checkbox" value="<%= mergeUrlTags %>" />
 
-						<aui:input
-							helpMessage="include-tags-set-by-other-applications-help"
-							label="include-tags-set-by-other-applications"
-							name="preferences--mergeLayoutTags--" type="checkbox"
-							value="<%=mergeLayoutTags%>" />
+						<aui:input helpMessage="include-tags-set-by-other-applications-help" label="include-tags-set-by-other-applications" name="preferences--mergeLayoutTags--" type="checkbox" value="<%= mergeLayoutTags %>" />
 
 						<aui:script use="liferay-auto-fields">
 							var autoFields = new Liferay.AutoFields(
 								{
 									contentBox: '#<portlet:namespace />queryRules > fieldset',
 									fieldIndexes: '<portlet:namespace />queryLogicIndexes',
-									url: '<portlet:renderURL
-								windowState="<%=LiferayWindowState.EXCLUSIVE.toString()%>">
-								<portlet:param name="struts_action"
-									value="/portlet_configuration/edit_query_rule" />
-							</portlet:renderURL>'
+									url: '<portlet:renderURL windowState="<%= LiferayWindowState.EXCLUSIVE.toString() %>"><portlet:param name="struts_action" value="/portlet_configuration/edit_query_rule" /></portlet:renderURL>'
 								}
 							).render();
 
 							Liferay.Util.toggleSelectBox('<portlet:namespace />defaultScope','false','<portlet:namespace />scopesBoxes');
 						</aui:script>
 					</liferay-ui:panel>
-					<liferay-ui:panel collapsible="<%=true%>" extended="<%=true%>"
-						id="assetPublisherCustomUserAttributesQueryRulesPanelContainer"
-						persistState="<%=true%>" title="custom-user-attributes">
-						<aui:input helpMessage="custom-user-attributes-help"
-							label="displayed-assets-must-match-these-custom-user-profile-attributes"
-							name="preferences--customUserAttributes--"
-							value="<%=customUserAttributes%>" />
+					<liferay-ui:panel collapsible="<%= true %>" extended="<%= true %>" id="assetPublisherCustomUserAttributesQueryRulesPanelContainer" persistState="<%= true %>" title="custom-user-attributes">
+						<aui:input helpMessage="custom-user-attributes-help" label="displayed-assets-must-match-these-custom-user-profile-attributes" name="preferences--customUserAttributes--" value="<%= customUserAttributes %>" />
 					</liferay-ui:panel>
-					<liferay-ui:panel collapsible="<%=true%>" extended="<%=true%>"
-						id="assetPublisherOrderingAndGroupingPanel"
-						persistState="<%=true%>" title="ordering-and-grouping">
+					<liferay-ui:panel collapsible="<%= true %>" extended="<%= true %>" id="assetPublisherOrderingAndGroupingPanel" persistState="<%= true %>" title="ordering-and-grouping">
 						<aui:fieldset>
-							<span class="aui-field-row"> <aui:select
-									inlineField="<%=true%>" inlineLabel="left" label="order-by"
-									name="preferences--orderByColumn1--">
-									<aui:option label="title"
-										selected='<%=orderByColumn1.equals("title")%>' />
-									<aui:option label="create-date"
-										selected='<%=orderByColumn1.equals("createDate")%>'
-										value="createDate" />
-									<aui:option label="modified-date"
-										selected='<%=orderByColumn1.equals("modifiedDate")%>'
-										value="modifiedDate" />
-									<aui:option label="publish-date"
-										selected='<%=orderByColumn1.equals("publishDate")%>'
-										value="publishDate" />
-									<aui:option label="expiration-date"
-										selected='<%=orderByColumn1.equals("expirationDate")%>'
-										value="expirationDate" />
-									<aui:option label="priority"
-										selected='<%=orderByColumn1.equals("priority")%>'>
-										<liferay-ui:message key="priority" />
-									</aui:option>
-									<aui:option label="view-count"
-										selected='<%=orderByColumn1.equals("viewCount")%>'
-										value="viewCount" />
-									<aui:option label="ratings"
-										selected='<%=orderByColumn1.equals("ratings")%>'>
-										<liferay-ui:message key="ratings" />
-									</aui:option>
-								</aui:select> <aui:select inlineField="<%=true%>" label=""
-									name="preferences--orderByType1--">
-									<aui:option label="ascending"
-										selected='<%=orderByType1.equals("ASC")%>'
-										value="ASC" />
-									<aui:option label="descending"
-										selected='<%=orderByType1.equals("DESC")%>'
-										value="DESC" />
+							<span class="aui-field-row">
+								<aui:select inlineField="<%= true %>" inlineLabel="left" label="order-by" name="preferences--orderByColumn1--">
+									<aui:option label="title" selected='<%= orderByColumn1.equals("title") %>' />
+									<aui:option label="create-date" selected='<%= orderByColumn1.equals("createDate") %>' value="createDate" />
+									<aui:option label="modified-date" selected='<%= orderByColumn1.equals("modifiedDate") %>' value="modifiedDate" />
+									<aui:option label="publish-date" selected='<%= orderByColumn1.equals("publishDate") %>' value="publishDate" />
+									<aui:option label="expiration-date" selected='<%= orderByColumn1.equals("expirationDate") %>' value="expirationDate" />
+									<aui:option label="priority" selected='<%= orderByColumn1.equals("priority") %>'><liferay-ui:message key="priority" /></aui:option>
+									<aui:option label="view-count" selected='<%= orderByColumn1.equals("viewCount") %>' value="viewCount" />
+									<aui:option label="ratings" selected='<%= orderByColumn1.equals("ratings") %>'><liferay-ui:message key="ratings" /></aui:option>
+								</aui:select>
+
+								<aui:select inlineField="<%= true %>" label="" name="preferences--orderByType1--">
+									<aui:option label="ascending" selected='<%= orderByType1.equals("ASC") %>' value="ASC" />
+									<aui:option label="descending" selected='<%= orderByType1.equals("DESC") %>' value="DESC" />
 								</aui:select>
 							</span>
 
-							<span class="aui-field-row"> <aui:select
-									inlineField="<%=true%>" inlineLabel="left" label="and-then-by"
-									name="preferences--orderByColumn2--">
-									<aui:option label="title"
-										selected='<%=orderByColumn2.equals("title")%>' />
-									<aui:option label="create-date"
-										selected='<%=orderByColumn2.equals("createDate")%>'
-										value="createDate" />
-									<aui:option label="modified-date"
-										selected='<%=orderByColumn2.equals("modifiedDate")%>'
-										value="modifiedDate" />
-									<aui:option label="publish-date"
-										selected='<%=orderByColumn2.equals("publishDate")%>'
-										value="publishDate" />
-									<aui:option label="expiration-date"
-										selected='<%=orderByColumn2.equals("expirationDate")%>'
-										value="expirationDate" />
-									<aui:option label="priority"
-										selected='<%=orderByColumn2.equals("priority")%>'>
-										<liferay-ui:message key="priority" />
-									</aui:option>
-									<aui:option label="view-count"
-										selected='<%=orderByColumn2.equals("viewCount")%>'
-										value="viewCount" />
-									<aui:option label="ratings"
-										selected='<%=orderByColumn1.equals("ratings")%>'>
-										<liferay-ui:message key="ratings" />
-									</aui:option>
-								</aui:select> <aui:select inlineField="<%=true%>" label=""
-									name="preferences--orderByType2--">
-									<aui:option label="ascending"
-										selected='<%=orderByType2.equals("ASC")%>'
-										value="ASC" />
-									<aui:option label="descending"
-										selected='<%=orderByType2.equals("DESC")%>'
-										value="DESC" />
+							<span class="aui-field-row">
+								<aui:select inlineField="<%= true %>" inlineLabel="left" label="and-then-by" name="preferences--orderByColumn2--">
+									<aui:option label="title" selected='<%= orderByColumn2.equals("title") %>' />
+									<aui:option label="create-date" selected='<%= orderByColumn2.equals("createDate") %>' value="createDate" />
+									<aui:option label="modified-date" selected='<%= orderByColumn2.equals("modifiedDate") %>' value="modifiedDate" />
+									<aui:option label="publish-date" selected='<%= orderByColumn2.equals("publishDate") %>' value="publishDate" />
+									<aui:option label="expiration-date" selected='<%= orderByColumn2.equals("expirationDate") %>' value="expirationDate" />
+									<aui:option label="priority" selected='<%= orderByColumn2.equals("priority") %>'><liferay-ui:message key="priority" /></aui:option>
+									<aui:option label="view-count" selected='<%= orderByColumn2.equals("viewCount") %>' value="viewCount" />
+									<aui:option label="ratings" selected='<%= orderByColumn1.equals("ratings") %>'><liferay-ui:message key="ratings" /></aui:option>
+								</aui:select>
+
+								<aui:select inlineField="<%= true %>" label="" name="preferences--orderByType2--">
+									<aui:option label="ascending" selected='<%= orderByType2.equals("ASC") %>' value="ASC" />
+									<aui:option label="descending" selected='<%= orderByType2.equals("DESC") %>' value="DESC" />
 								</aui:select>
 							</span>
 
-							<span class="aui-field-row"> <aui:select
-									inlineField="<%=true%>" inlineLabel="left" label="group-by"
-									name="preferences--assetVocabularyId--">
+							<span class="aui-field-row">
+								<aui:select inlineField="<%= true %>" inlineLabel="left" label="group-by" name="preferences--assetVocabularyId--">
 									<aui:option value="" />
-									<aui:option label="asset-types"
-										selected="<%=assetVocabularyId == -1%>" value="-1" />
+									<aui:option label="asset-types" selected="<%= assetVocabularyId == -1 %>" value="-1" />
 
 									<%
-										Group companyGroup = company.getGroup();
+									Group companyGroup = company.getGroup();
 
-										if (scopeGroupId != companyGroup.getGroupId()) {
-											List<AssetVocabulary> assetVocabularies = AssetVocabularyLocalServiceUtil.getGroupVocabularies(scopeGroupId,
-																					false);
-
-											if (!assetVocabularies.isEmpty()) {
-									%>
-
-									<optgroup label="<liferay-ui:message key="vocabularies" />">
-
-										<%
-											for (AssetVocabulary assetVocabulary : assetVocabularies) {
-																						assetVocabulary = assetVocabulary.toEscapedModel();
-										%>
-
-										<aui:option
-											label="<%=assetVocabulary.getTitle(locale)%>"
-											selected="<%=assetVocabularyId == assetVocabulary.getVocabularyId()%>"
-											value="<%=assetVocabulary.getVocabularyId()%>" />
-
-										<%
-											}
-										%>
-
-									</optgroup>
-
-									<%
-										}
-																		}
-									%>
-
-									<%
-										List<AssetVocabulary> assetVocabularies = AssetVocabularyLocalServiceUtil.getGroupVocabularies(
-																				companyGroup.getGroupId(), false);
+									if (scopeGroupId != companyGroup.getGroupId()) {
+										List<AssetVocabulary> assetVocabularies = AssetVocabularyLocalServiceUtil.getGroupVocabularies(scopeGroupId, false);
 
 										if (!assetVocabularies.isEmpty()) {
+										%>
+
+											<optgroup label="<liferay-ui:message key="vocabularies" />">
+
+												<%
+												for (AssetVocabulary assetVocabulary : assetVocabularies) {
+													assetVocabulary = assetVocabulary.toEscapedModel();
+												%>
+
+													<aui:option label="<%= assetVocabulary.getTitle(locale) %>" selected="<%= assetVocabularyId == assetVocabulary.getVocabularyId() %>" value="<%= assetVocabulary.getVocabularyId() %>" />
+
+												<%
+												}
+												%>
+
+											</optgroup>
+
+										<%
+										}
+									}
 									%>
 
-									<optgroup
-										label="<liferay-ui:message key="vocabularies" /> (<liferay-ui:message key="global" />)">
+									<%
+									List<AssetVocabulary> assetVocabularies = AssetVocabularyLocalServiceUtil.getGroupVocabularies(companyGroup.getGroupId(), false);
 
-										<%
+									if (!assetVocabularies.isEmpty()) {
+									%>
+
+										<optgroup label="<liferay-ui:message key="vocabularies" /> (<liferay-ui:message key="global" />)">
+
+											<%
 											for (AssetVocabulary assetVocabulary : assetVocabularies) {
-																					assetVocabulary = assetVocabulary.toEscapedModel();
-										%>
+												assetVocabulary = assetVocabulary.toEscapedModel();
+											%>
 
-										<aui:option
-											label="<%=assetVocabulary.getTitle(locale)%>"
-											selected="<%=assetVocabularyId == assetVocabulary.getVocabularyId()%>"
-											value="<%=assetVocabulary.getVocabularyId()%>" />
+												<aui:option label="<%= assetVocabulary.getTitle(locale) %>" selected="<%= assetVocabularyId == assetVocabulary.getVocabularyId() %>" value="<%= assetVocabulary.getVocabularyId() %>" />
 
-										<%
+											<%
 											}
-										%>
+											%>
 
-									</optgroup>
+										</optgroup>
 
 									<%
-										}
+									}
 									%>
 
 								</aui:select>
 							</span>
 						</aui:fieldset>
 					</liferay-ui:panel>
-					<liferay-ui:panel collapsible="<%=true%>" extended="<%=true%>"
-						id="assetPublisherDisplaySettingsPanel" persistState="<%=true%>"
-						title="display-settings">
-						<%@ include
-							file="/html/portlet/asset_publisher/display_settings.jspf"%>
+					<liferay-ui:panel collapsible="<%= true %>" extended="<%= true %>" id="assetPublisherDisplaySettingsPanel" persistState="<%= true %>" title="display-settings">
+						<%@ include file="/html/portlet/asset_publisher/display_settings.jspf" %>
 					</liferay-ui:panel>
-					<liferay-ui:panel collapsible="<%=true%>" extended="<%=true%>"
-						id="assetPublisherRssPanel" persistState="<%=true%>" title="rss">
+					<liferay-ui:panel collapsible="<%= true %>" extended="<%= true %>" id="assetPublisherRssPanel" persistState="<%= true %>" title="rss">
 						<aui:fieldset>
-							<aui:input label="enable-rss-subscription"
-								name="preferences--enableRss--" type="checkbox"
-								value="<%=enableRSS%>" />
+							<aui:input label="enable-rss-subscription" name="preferences--enableRss--" type="checkbox" value="<%= enableRSS %>" />
 
 							<div id="<portlet:namespace />rssOptions">
-								<aui:input label="rss-feed-name" name="preferences--rssName--"
-									type="text" value="<%=rssName%>" />
+								<aui:input label="rss-feed-name" name="preferences--rssName--" type="text" value="<%= rssName %>" />
 
-								<aui:select label="maximum-items-to-display"
-									name="preferences--rssDelta--">
-									<aui:option label="1" selected="<%=rssDelta == 1%>" />
-									<aui:option label="2" selected="<%=rssDelta == 2%>" />
-									<aui:option label="3" selected="<%=rssDelta == 3%>" />
-									<aui:option label="4" selected="<%=rssDelta == 4%>" />
-									<aui:option label="5" selected="<%=rssDelta == 5%>" />
-									<aui:option label="10" selected="<%=rssDelta == 10%>" />
-									<aui:option label="15" selected="<%=rssDelta == 15%>" />
-									<aui:option label="20" selected="<%=rssDelta == 20%>" />
-									<aui:option label="25" selected="<%=rssDelta == 25%>" />
-									<aui:option label="30" selected="<%=rssDelta == 30%>" />
-									<aui:option label="40" selected="<%=rssDelta == 40%>" />
-									<aui:option label="50" selected="<%=rssDelta == 50%>" />
-									<aui:option label="60" selected="<%=rssDelta == 60%>" />
-									<aui:option label="70" selected="<%=rssDelta == 70%>" />
-									<aui:option label="80" selected="<%=rssDelta == 80%>" />
-									<aui:option label="90" selected="<%=rssDelta == 90%>" />
-									<aui:option label="100" selected="<%=rssDelta == 100%>" />
+								<aui:select label="maximum-items-to-display" name="preferences--rssDelta--">
+									<aui:option label="1" selected="<%= rssDelta == 1 %>" />
+									<aui:option label="2" selected="<%= rssDelta == 2 %>" />
+									<aui:option label="3" selected="<%= rssDelta == 3 %>" />
+									<aui:option label="4" selected="<%= rssDelta == 4 %>" />
+									<aui:option label="5" selected="<%= rssDelta == 5 %>" />
+									<aui:option label="10" selected="<%= rssDelta == 10 %>" />
+									<aui:option label="15" selected="<%= rssDelta == 15 %>" />
+									<aui:option label="20" selected="<%= rssDelta == 20 %>" />
+									<aui:option label="25" selected="<%= rssDelta == 25 %>" />
+									<aui:option label="30" selected="<%= rssDelta == 30 %>" />
+									<aui:option label="40" selected="<%= rssDelta == 40 %>" />
+									<aui:option label="50" selected="<%= rssDelta == 50 %>" />
+									<aui:option label="60" selected="<%= rssDelta == 60 %>" />
+									<aui:option label="70" selected="<%= rssDelta == 70 %>" />
+									<aui:option label="80" selected="<%= rssDelta == 80 %>" />
+									<aui:option label="90" selected="<%= rssDelta == 90 %>" />
+									<aui:option label="100" selected="<%= rssDelta == 100 %>" />
 								</aui:select>
 
-								<aui:select label="display-style"
-									name="preferences--rssDisplayStyle--">
-									<aui:option label="<%=RSSUtil.DISPLAY_STYLE_ABSTRACT%>"
-										selected="<%=rssDisplayStyle.equals(RSSUtil.DISPLAY_STYLE_ABSTRACT)%>" />
-									<aui:option label="<%=RSSUtil.DISPLAY_STYLE_TITLE%>"
-										selected="<%=rssDisplayStyle.equals(RSSUtil.DISPLAY_STYLE_TITLE)%>" />
+								<aui:select label="display-style" name="preferences--rssDisplayStyle--">
+									<aui:option label="<%= RSSUtil.DISPLAY_STYLE_ABSTRACT %>" selected="<%= rssDisplayStyle.equals(RSSUtil.DISPLAY_STYLE_ABSTRACT) %>" />
+									<aui:option label="<%= RSSUtil.DISPLAY_STYLE_TITLE %>" selected="<%= rssDisplayStyle.equals(RSSUtil.DISPLAY_STYLE_TITLE) %>" />
 								</aui:select>
 
 								<aui:select label="format" name="preferences--rssFormat--">
-									<aui:option label="RSS 1.0"
-										selected='<%=rssFormat.equals("rss10")%>' value="rss10" />
-									<aui:option label="RSS 2.0"
-										selected='<%=rssFormat.equals("rss20")%>' value="rss20" />
-									<aui:option label="Atom 1.0"
-										selected='<%=rssFormat.equals("atom10")%>'
-										value="atom10" />
+									<aui:option label="RSS 1.0" selected='<%= rssFormat.equals("rss10") %>' value="rss10" />
+									<aui:option label="RSS 2.0" selected='<%= rssFormat.equals("rss20") %>' value="rss20" />
+									<aui:option label="Atom 1.0" selected='<%= rssFormat.equals("atom10") %>' value="atom10" />
 								</aui:select>
 							</div>
 						</aui:fieldset>
@@ -859,42 +711,40 @@ not, see <http://www.gnu.org/licenses/>.
 				</liferay-ui:panel-container>
 
 				<aui:button-row>
-					<aui:button
-						onClick='<%=renderResponse.getNamespace() + "saveSelectBoxes();"%>'
-						type="submit" />
+					<aui:button onClick='<%= renderResponse.getNamespace() + "saveSelectBoxes();" %>' type="submit" />
 				</aui:button-row>
 			</c:when>
 		</c:choose>
 	</c:if>
 </aui:form>
 
-<c:if test="<%=Validator.isNotNull(typeSelection)%>">
-	<%@ include file="/html/portlet/asset_publisher/select_asset.jspf"%>
+<c:if test="<%= Validator.isNotNull(typeSelection) %>">
+	<%@ include file="/html/portlet/asset_publisher/select_asset.jspf" %>
 </c:if>
 
 <aui:script>
 	function <portlet:namespace />chooseSelectionStyle() {
-		document.<portlet:namespace />fm.<portlet:namespace /><%=Constants.CMD%>.value = 'selection-style';
+		document.<portlet:namespace />fm.<portlet:namespace /><%= Constants.CMD %>.value = 'selection-style';
 
 		submitForm(document.<portlet:namespace />fm);
 	}
 
 	function <portlet:namespace />moveSelectionDown(assetEntryOrder) {
-		document.<portlet:namespace />fm.<portlet:namespace /><%=Constants.CMD%>.value = 'move-selection-down';
+		document.<portlet:namespace />fm.<portlet:namespace /><%= Constants.CMD %>.value = 'move-selection-down';
 		document.<portlet:namespace />fm.<portlet:namespace />assetEntryOrder.value = assetEntryOrder;
 
 		submitForm(document.<portlet:namespace />fm);
 	}
 
 	function <portlet:namespace />moveSelectionUp(assetEntryOrder) {
-		document.<portlet:namespace />fm.<portlet:namespace /><%=Constants.CMD%>.value = 'move-selection-up';
+		document.<portlet:namespace />fm.<portlet:namespace /><%= Constants.CMD %>.value = 'move-selection-up';
 		document.<portlet:namespace />fm.<portlet:namespace />assetEntryOrder.value = assetEntryOrder;
 
 		submitForm(document.<portlet:namespace />fm);
 	}
 
 	function <portlet:namespace />selectAsset(assetEntryId, assetEntryOrder) {
-		document.<portlet:namespace />fm.<portlet:namespace /><%=Constants.CMD%>.value = 'add-selection';
+		document.<portlet:namespace />fm.<portlet:namespace /><%= Constants.CMD %>.value = 'add-selection';
 		document.<portlet:namespace />fm.<portlet:namespace />assetEntryId.value = assetEntryId;
 		document.<portlet:namespace />fm.<portlet:namespace />assetEntryOrder.value = assetEntryOrder;
 
@@ -906,11 +756,11 @@ not, see <http://www.gnu.org/licenses/>.
 		document.<portlet:namespace />fm.<portlet:namespace />typeSelection.value = type;
 		document.<portlet:namespace />fm.<portlet:namespace />assetEntryOrder.value = -1;
 
-		submitForm(document.<portlet:namespace />fm, '<%=configurationRenderURL.toString()%>');
+		submitForm(document.<portlet:namespace />fm, '<%= configurationRenderURL.toString() %>');
 	}
 
 	function <portlet:namespace />selectScope() {
-		document.<portlet:namespace />fm.<portlet:namespace /><%=Constants.CMD%>.value = 'select-scope';
+		document.<portlet:namespace />fm.<portlet:namespace /><%= Constants.CMD %>.value = 'select-scope';
 
 		if (document.<portlet:namespace />fm.<portlet:namespace />defaultScope.value != 'false') {
 			submitForm(document.<portlet:namespace />fm);
@@ -930,17 +780,17 @@ not, see <http://www.gnu.org/licenses/>.
 			}
 
 			<%
-	for (AssetRendererFactory curRendererFactory : classTypesAssetRendererFactories) {
-			String className = AssetPublisherUtil.getClassName(curRendererFactory);
-%>
+			for (AssetRendererFactory curRendererFactory : classTypesAssetRendererFactories) {
+				String className = AssetPublisherUtil.getClassName(curRendererFactory);
+			%>
 
-				if (document.<portlet:namespace />fm.<portlet:namespace />classTypeIds<%=className%>) {
-					document.<portlet:namespace />fm.<portlet:namespace />classTypeIds<%=className%>.value = Liferay.Util.listSelect(document.<portlet:namespace />fm.<portlet:namespace /><%=className%>currentClassTypeIds);
+				if (document.<portlet:namespace />fm.<portlet:namespace />classTypeIds<%= className %>) {
+					document.<portlet:namespace />fm.<portlet:namespace />classTypeIds<%= className %>.value = Liferay.Util.listSelect(document.<portlet:namespace />fm.<portlet:namespace /><%= className %>currentClassTypeIds);
 				}
 
 			<%
-	}
-%>
+			}
+			%>
 
 			document.<portlet:namespace />fm.<portlet:namespace />metadataFields.value = Liferay.Util.listSelect(document.<portlet:namespace />fm.<portlet:namespace />currentMetadataFields);
 
@@ -957,7 +807,7 @@ not, see <http://www.gnu.org/licenses/>.
 				document.<portlet:namespace />fm.<portlet:namespace />scopeIds.value = Liferay.Util.listSelect(document.<portlet:namespace />fm.<portlet:namespace />currentScopeIds);
 			}
 
-			document.<portlet:namespace />fm.<portlet:namespace /><%=Constants.CMD%>.value = 'select-scope';
+			document.<portlet:namespace />fm.<portlet:namespace /><%= Constants.CMD %>.value = 'select-scope';
 
 			submitForm(document.<portlet:namespace />fm);
 		},
@@ -980,49 +830,49 @@ not, see <http://www.gnu.org/licenses/>.
 	);
 </aui:script>
 
-<c:if test='<%=selectionStyle.equals("dynamic")%>'>
+<c:if test='<%= selectionStyle.equals("dynamic") %>'>
 	<aui:script use="aui-base">
 		var assetSelector = A.one('#<portlet:namespace />anyAssetType');
 		var assetMulitpleSelector = A.one('#<portlet:namespace />currentClassNameIds');
 
 		<%
 		for (AssetRendererFactory curRendererFactory : classTypesAssetRendererFactories) {
-					String className = AssetPublisherUtil.getClassName(curRendererFactory);
-	%>
+			String className = AssetPublisherUtil.getClassName(curRendererFactory);
+		%>
 
-			Liferay.Util.toggleSelectBox('<portlet:namespace />anyClassType<%=className%>','false','<portlet:namespace /><%=className%>Boxes');
+			Liferay.Util.toggleSelectBox('<portlet:namespace />anyClassType<%= className %>','false','<portlet:namespace /><%= className %>Boxes');
 
-			var <portlet:namespace /><%=className%>Options = A.one('#<portlet:namespace /><%=className%>Options');
+			var <portlet:namespace /><%= className %>Options = A.one('#<portlet:namespace /><%= className %>Options');
 
-			function <portlet:namespace />toggle<%=className%>() {
+			function <portlet:namespace />toggle<%= className %>() {
 				var assetOptions = assetMulitpleSelector.all('option');
 
-				if ((assetSelector.val() == '<%=curRendererFactory.getClassNameId()%>') ||
-					((assetSelector.val() == 'false') && (assetOptions.size() == 1) && (assetOptions.item(0).val() == '<%=curRendererFactory.getClassNameId()%>'))) {
+				if ((assetSelector.val() == '<%= curRendererFactory.getClassNameId() %>') ||
+					((assetSelector.val() == 'false') && (assetOptions.size() == 1) && (assetOptions.item(0).val() == '<%= curRendererFactory.getClassNameId() %>'))) {
 
-					<portlet:namespace /><%=className%>Options.show();
+					<portlet:namespace /><%= className %>Options.show();
 				}
 				else {
-					<portlet:namespace /><%=className%>Options.hide();
+					<portlet:namespace /><%= className %>Options.hide();
 				}
 			}
 
 		<%
 		}
-	%>
+		%>
 
 		function <portlet:namespace />toggleSubclasses() {
 
 			<%
-		for (AssetRendererFactory curRendererFactory : classTypesAssetRendererFactories) {
-					String className = AssetPublisherUtil.getClassName(curRendererFactory);
-	%>
+			for (AssetRendererFactory curRendererFactory : classTypesAssetRendererFactories) {
+				String className = AssetPublisherUtil.getClassName(curRendererFactory);
+			%>
 
-		<portlet:namespace />toggle<%=className%>();
+				<portlet:namespace />toggle<%= className %>();
 
 			<%
 			}
-		%>
+			%>
 
 		}
 
@@ -1046,30 +896,35 @@ not, see <http://www.gnu.org/licenses/>.
 	</aui:script>
 </c:if>
 
-<%!private String _getKey(Group group, long scopeGroupId) throws Exception {
-		String key = null;
+<%!
+private String _getKey(Group group, long scopeGroupId) throws Exception {
+	String key = null;
 
-		if (group.isLayout()) {
-			Layout layout = LayoutLocalServiceUtil.getLayout(group.getClassPK());
+	if (group.isLayout()) {
+		Layout layout = LayoutLocalServiceUtil.getLayout(group.getClassPK());
 
-			key = "Layout" + StringPool.UNDERLINE + layout.getLayoutId();
-		} else if (group.isLayoutPrototype() || (group.getGroupId() == scopeGroupId)) {
-			key = "Group" + StringPool.UNDERLINE + GroupConstants.DEFAULT;
-		} else {
-			key = "Group" + StringPool.UNDERLINE + group.getGroupId();
-		}
-
-		return key;
+		key = "Layout" + StringPool.UNDERLINE + layout.getLayoutId();
+	}
+	else if (group.isLayoutPrototype() || (group.getGroupId() == scopeGroupId)) {
+		key = "Group" + StringPool.UNDERLINE + GroupConstants.DEFAULT;
+	}
+	else {
+		key = "Group" + StringPool.UNDERLINE + group.getGroupId();
 	}
 
-	private String _getName(Group group, Locale locale) throws Exception {
-		String name = null;
+	return key;
+}
 
-		if (group.isLayoutPrototype()) {
-			name = LanguageUtil.get(locale, "default");
-		} else {
-			name = HtmlUtil.escape(group.getDescriptiveName(locale));
-		}
+private String _getName(Group group, Locale locale) throws Exception {
+	String name = null;
 
-		return name;
-	}%>
+	if (group.isLayoutPrototype()) {
+		name = LanguageUtil.get(locale, "default");
+	}
+	else {
+		name = HtmlUtil.escape(group.getDescriptiveName(locale));
+	}
+
+	return name;
+}
+%>
