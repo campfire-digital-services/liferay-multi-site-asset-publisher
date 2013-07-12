@@ -12,8 +12,8 @@
 	</parent>
 
 	<groupId>au.com.permeance.utility</groupId>
-	<artifactId>liferay-asset-publisher-hook</artifactId>
-	<version>1.0.0.0</version>
+	<artifactId>liferay-multi-site-asset-publisher-hook</artifactId>
+	<version>1.0.0.1</version>
 	<packaging>war</packaging>
 
 	<properties>
@@ -52,7 +52,7 @@
 		<url>http://www.permeance.com.au</url>
 	</organization>
 	<name>Liferay Multisite Asset Publisher Hook Plugin.</name>
-	<description>A hook plugin for Liferay Portal which sources content from all the available sites to asset publsiher.</description>
+	<description>A hook plugin for Liferay Portal which sources content from all the available sites to asset publisher.</description>
 	<url>https://github.com/permeance/liferay-multi-site-asset-publisher</url>
 </project>
 
