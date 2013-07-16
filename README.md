@@ -31,10 +31,13 @@ The latest release is available from [SourceForge - Liferay Multi Site Asset Pub
 ![Asset Publisher Configuration with this plugin](/docs/images/liferay-multi-site-asset-publisher-with-hook.png "Asset Publisher Configuration with Plugin")
 
 ** All Available Sites
+
+
 ![Asset Publisher Configuration - all available sites](/docs/images/liferay-multi-site-asset-publisher-sites-available.png "Asset Publisher Configuration - all available sites")
 
 
 ** All Available Organizations
+
 ![Asset Publisher Configuration - all available organizations](/docs/images/liferay-multi-site-asset-publisher-org.png "Asset Publisher Configuration - all available organizations")
 
 
