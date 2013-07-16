@@ -18,6 +18,21 @@ The latest release is available from [SourceForge - Liferay Multi Site Asset Pub
 
 ## Usage
 
+### Configuring Asset Publisher without this plugin
+* Add the Asset Publisher Portlet.
+* Click Configuration on the right top of the asset publisher portlet.
+* Under Scope tab, we could see only Liferay and Global sites are available
+![Asset Publisher Configuration without this plugin](/docs/images/liferay-multi-site-asset-publisher-without-hook.png "Asset Publisher Configuration without Plugin")
+
+### Configuring Asset Publisher with this Plugin
+* Add the Asset Publisher Portlet.
+* Click Configuration on the right top of the asset publisher portlet.
+* Under Scope tab, we could see all the available sites and organizations.
+![Asset Publisher Configuration with this plugin](/docs/images/liferay-multi-site-asset-publisher-without.png "Asset Publisher Configuration with Plugin")
+![Asset Publisher Configuration - all available sites](/docs/images/liferay-multi-site-asset-publisher-sites-available.png "Asset Publisher Configuration - all available sites")
+![Asset Publisher Configuration - all available organizations](/docs/images/liferay-multi-site-asset-publisher-org.png "Asset Publisher Configuration - all available organizations")
+
+
 ## Building
 
 Step 1. Checkout source from GitHub project
