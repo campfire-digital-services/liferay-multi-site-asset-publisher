@@ -56,6 +56,12 @@ This will build "liferay-multi-site-asset-publisher-hook-A.B.C.war" in the targe
 NOTE: You will require JDK 1.6+ and Maven 3.
 
 
+## Plugin Security
+
+This plugin comes with the PACL Security Manager disabled. 
+However the list of PACL requirements to run this plugin in secure mode is available (commented out) in WEB-INF/liferay-plugin-package.properties. You can uncomment those entries to run the plugin in PACL secure mode.
+
+
 ## Installation
 
 ### Liferay Portal + Apache Tomcat Bundle
